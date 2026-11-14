@@ -388,6 +388,7 @@ nav .badge{position:absolute;top:0;left:calc(50% + 6px);background:var(--bad);co
   function save() { S.savedAt = new Date().toISOString(); store.set(KEY, S); }
 
   // ---------------------------------------------------------------- helpers
+  function pl(n, w) { return n + " " + w + (n === 1 ? "" : "s"); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
     return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
@@ -797,7 +798,7 @@ nav .badge{position:absolute;top:0;left:calc(50% + 6px);background:var(--bad);co
       '<label class="btn">Pick a bank file (CSV)<input type="file" id="bankfile" accept=".csv,text/csv,text/plain" hidden></label></div>';
     if (!I) return h;
     var n = I.rows.filter(function (r) { return r.use; }).length;
-    h += '<form id="impf" class="card" style="margin-top:12px;overflow-x:auto"><p class="small" style="margin-top:0">' + I.rows.length + " rows found. Untick the ones that aren't business (rows you already have are unticked).</p>" +
+    h += '<form id="impf" class="card" style="margin-top:12px;overflow-x:auto"><p class="small" style="margin-top:0">' + pl(I.rows.length, "row") + " found. Untick the ones that aren't business (rows you already have are unticked).</p>" +
       field("Dates in the file", sel("order", ["Day first (31/12/2026)", "Month first (12/31/2026)"], I.order === "md" ? "Month first (12/31/2026)" : "Day first (31/12/2026)")) +
       '<table class="mini imp"><tr><th></th><th>Date</th><th>Description</th><th>Type</th><th style="text-align:right">Amount</th></tr>' + I.rows.map(function (r, i) {
         return '<tr><td><input type="checkbox" name="u' + i + '"' + (r.use ? " checked" : "") + ' aria-label="Add this row"></td><td>' + esc(fmtDate(r.date, { year: "2-digit" })) + "</td><td>" + esc(r.text) + (r.dup ? ' <span class="pill wait">already in</span>' : "") +
@@ -856,7 +857,7 @@ nav .badge{position:absolute;top:0;left:calc(50% + 6px);background:var(--bad);co
     else if (a === "us-periods") { var y = +S.qdef[0].start.slice(0, 4); S.qdef = [["Q1", "01-01", "03-31", "04-15", 0], ["Q2", "04-01", "05-31", "06-15", 0], ["Q3", "06-01", "08-31", "09-15", 0], ["Q4", "09-01", "12-31", "01-15", 1]]
       .map(function (q) { return { label: q[0], start: y + "-" + q[1], end: y + "-" + q[2], due: (y + q[4]) + "-" + q[3] }; }); save(); view.keep = true; render(); toast("US periods set"); }
     else if (a === "imp-cancel") { view.imp = null; view.keep = true; render(); }
-    else if (a === "copy") { var txt = tsv(v); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { toast("Copied " + S[v].length + " rows"); },
+    else if (a === "copy") { var txt = tsv(v); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { toast("Copied " + pl(S[v].length, "row") + ""); },
       function () { download(v + ".tsv", txt, "text/tab-separated-values"); }); }
     else if (a === "csv") download("freelancer-" + v + ".csv", csv(v), "text/csv");
     else if (a === "install") {
@@ -918,7 +919,7 @@ nav .badge{position:absolute;top:0;left:calc(50% + 6px);background:var(--bad);co
         var key = r.kind + ":" + r.text.toLowerCase().replace(/[^a-z]+/g, " ").trim().split(" ").slice(0, 2).join(" "); S.rules[key] = r.cat;
         if (r.kind === "income") S.income.push({ id: uid("i"), date: r.date, client: r.text.slice(0, 40), desc: "From bank file", cat: r.cat, inv: "", amount: r.amount, status: "Paid", paid_on: r.date, due: null, note: "" });
         else S.expenses.push({ id: uid("x"), date: r.date, vendor: r.text.slice(0, 40), cat: r.cat, pay: "Bank transfer", receipt: "", note: "From bank file", amount: r.amount }); });
-      sortDate("income"); sortDate("expenses"); view.imp = null; save(); view.keep = true; render(); toast(n + " rows added"); }
+      sortDate("income"); sortDate("expenses"); view.imp = null; save(); view.keep = true; render(); toast(pl(n, "row") + " added"); }
   });
 
   // ---------------------------------------------------------------- start
